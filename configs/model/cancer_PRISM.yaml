@@ -1,0 +1,15 @@
+_target_: main_code.lightning_model.NetMultiViewLightning
+
+# Params for PRISM_19Q4
+
+layers_before_concat: [2048, 1024, 512, 256]
+layers_after_concat: [512, 256, 128]
+input_size: [18748, 256]
+output_size: 1
+dropout: 0.05
+activation: relu
+lr: 0.0001
+max_lr: 0.01
+weight_decay: 0.001
+task: regression
+loss_function: mse

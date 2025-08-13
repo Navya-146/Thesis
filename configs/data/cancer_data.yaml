@@ -1,0 +1,15 @@
+datamodule:
+  _target_: main_code.data.CancerKFoldModule
+  path: ${paths.data_dir}cancer/PRISM_19Q4_lung/clf_global
+  presplit: false
+  split_seed: 42
+  num_splits: 5
+  num_workers: 10
+  batch_size: 256
+  use_geno_data: true
+  use_latent_data: true
+
+metadata:
+  groupname: PRISM_19Q4_lung_global_extreme
+  savename: ${data.metadata.groupname}_${now:%d_%m_%Y}
+# The cancer dataset should have 3 main files - the latent representation, the genotye file and the observations

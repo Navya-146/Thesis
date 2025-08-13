@@ -1,0 +1,22 @@
+{
+  "os": "Windows-10-10.0.26100-SP0",
+  "python": "CPython 3.10.11",
+  "startedAt": "2025-08-12T05:05:45.135717Z",
+  "program": "<python with no main file>",
+  "email": "da24c011@smail.iitm.ac.in",
+  "root": ".",
+  "host": "DESKTOP-E7MJP9I",
+  "executable": "C:\\Users\\pooja\\OneDrive\\Desktop\\Documents\\IITM\\Thesis\\Training data\\final_ish\\code\\Rajeeva-IITM-yeast_growth_pred-3b6ddde\\.venv\\Scripts\\python.exe",
+  "cpu_count": 8,
+  "cpu_count_logical": 16,
+  "disk": {
+    "/": {
+      "total": "1006896148480",
+      "used": "243883540480"
+    }
+  },
+  "memory": {
+    "total": "7893950464"
+  },
+  "writerId": "ho1uqmyqfwfhv9jyplo53poqpemcgwpi"
+}

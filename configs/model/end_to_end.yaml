@@ -1,0 +1,59 @@
+_target_: main_code.lightning_model.PhenoPredict
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: true
+  lr: 0.0001
+  weight_decay: 0.1
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+  _partial_: true
+  T_0: 10
+
+net:
+  _target_: main_code.network.FGRNet
+  # _partial_: true``
+  # fgr_model: #TODO: Make this work
+  #   _target_: pickle.load
+  #   file:
+  #     - _target_: builtins.open
+  #     - file: /home/rajeeva/Project/outputs/fgr_model_pretrain.pt
+  #     - mode: rb
+  hidden_layers: [2048, 1024, 512, 256]
+  geno_size: 18748
+  latent_size: 256
+  output_size: 1
+  dropout: 0.05
+  activation: gelu
+
+loss_function:
+  _target_: torch.nn.BCEWithLogitsLoss
+
+main_metric:
+  _target_: torchmetrics.classification.BinaryAccuracy
+
+additional_metrics:
+  _target_: torchmetrics.MetricCollection
+  _recursive_: true
+  metrics:
+    _target_: builtins.dict
+    f1:
+      _target_: torchmetrics.F1Score
+      task: binary
+    auc_roc:
+      _target_: torchmetrics.AUROC
+      task: binary
+  compute_groups: true
+
+compile: false
+
+task: binary_classification
+
+fgr: true
+ckpt_path: ${oc.env:PROJECT}/outputs/fgr_model_pretrain.pt
+# Command to run:
+#  python kfold_run.py model=end_to_end +callbacks.finetune=finetune \
+#  data=cancer_data data.datamodule='${paths.data_dir}cancer/PRISM_19Q4_clf/' \
+#  data.metadata.groupname=PRISM_19Q4_lung_end_to_end data.datamodule.presplit=false \
+#  trainer.logger=false

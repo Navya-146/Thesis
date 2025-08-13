@@ -1,0 +1,64 @@
+# 0:
+#   params:
+#   - net.sequence.*
+
+0:
+  params:
+    - net.fgr_model.*
+  max_transition_epochs: 3
+# 0:
+#   params:
+#   - net.fgr_model.decoder.9.bias
+#   - net.fgr_model.decoder.9.weight
+# 1:
+#   params:
+#   - net.fgr_model.decoder.7.bias
+#   - net.fgr_model.decoder.7.weight
+# 2:
+#   params:
+#   - net.fgr_model.decoder.6.bias
+#   - net.fgr_model.decoder.6.weight
+# 3:
+#   params:
+#   - net.fgr_model.decoder.4.bias
+#   - net.fgr_model.decoder.4.weight
+# 4:
+#   params:
+#   - net.fgr_model.decoder.3.bias
+#   - net.fgr_model.decoder.3.weight
+# 5:
+#   params:
+#   - net.fgr_model.decoder.1.bias
+#   - net.fgr_model.decoder.1.weight
+# 6:
+#   params:
+#   - net.fgr_model.decoder.0.bias
+#   - net.fgr_model.decoder.0.weight
+# 7:
+#   params:
+#   - net.fgr_model.encoder.9.bias
+#   - net.fgr_model.encoder.9.weight
+# 8:
+#   params:
+#   - net.fgr_model.encoder.7.bias
+#   - net.fgr_model.encoder.7.weight
+# 9:
+#   params:
+#   - net.fgr_model.encoder.6.bias
+#   - net.fgr_model.encoder.6.weight
+# 10:
+#   params:
+#   - net.fgr_model.encoder.4.bias
+#   - net.fgr_model.encoder.4.weight
+# 11:
+#   params:
+#   - net.fgr_model.encoder.3.bias
+#   - net.fgr_model.encoder.3.weight
+# 12:
+#   params:
+#   - net.fgr_model.encoder.1.bias
+#   - net.fgr_model.encoder.1.weight
+# 13:
+#   params:
+#   - net.fgr_model.encoder.0.bias
+#   - net.fgr_model.encoder.0.weight

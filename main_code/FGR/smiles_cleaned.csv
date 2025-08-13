@@ -1,0 +1,152 @@
+compound_name,SMILES
+"1,3-diallylurea",C1=CC=C2C(=C1)C(=CC(=C2N)N=NC3=CC=C(C=C3)C4=CC=C(C=C4)N=NC5=C(C6=CC=CC=C6C(=C5)S(=O)(=O)[O-])N)S(=O)(=O)[O-].[Na+].[Na+]
+"1,4-dimethylendothall",CC12CCC(O1)(C(C2C(=O)O)C(=O)O)C
+"1,7-octadiene",C=CCCCCC=C
+"1,8-nonadiene",C=CCCCCCC=C
+2-cyanoethyl acrylate,C=CC(=O)OCCC#N
+4NQO,O=[N+]([O-])c1cc[n+]([O-])c2ccccc12
+5-fluorouracil,C1=C(C(=O)NC(=O)N1)F
+AG 957 (Biomol),COC(=O)c1ccc(NCc2cc(O)ccc2O)cc1
+BCNU,C(CCl)NC(=O)N(CCCl)N=O
+CID 144303,CCOc1cc(Nc2nc(N[C@H]3CC[C@H](O)CC3)c(CC)nc2C(N)=O)ccc1N1CCC(CC1)N1CCN(C)CC1
+CID 403818,CCOC(C(CCC1=CC=CC=C1)C2=C(NC(=NC2=O)N)N)OCC
+CID 604586,CC1=C2CCN(CN2C3=C1C=C(C=C3)OC)C
+CID 621889,CC1=NN2C=C(N=C2[Se]1)C3=CC=CC=C3
+CID 622648,CCP(CC)CC.[CH2-][CH-][CH-][CH2-].[CH2-][CH-][CH-][CH-]CC=C.[Fe]
+CID 630688,CC1=CC=C(C=C1)P(=S)(C2=CC=C(C=C2)C)C3=CC=C(C=C3)C
+CID 632839,CC(=O)NC1CCC2=CC(=C(C(=C2C3=CC=C(C(=O)C=C13)SC)OC)OC=O)OC
+CID 652287,COCCCNCC(=O)NC1=CC=C(C=C1)OC(F)(F)F
+CID 678146,CCN1C2=C(N=C1NCC3=CC=CC=C3)N(C(=O)NC2=O)C
+CID 683517,CC1=CC(=C(C=C1)C)NC(=O)CC(CC2=CC=CC=C2)C(=O)O
+CID 688028,CC1=CC=CC=C1NC(=S)NC2=CC=CC=C2C
+CID 693573,C1CC2=C(C(N3C(=NC=N3)N2)C4=CC=CC=C4)C(=O)C1
+CID 697443,CC1=CC=C(C=C1)C2=NN3C4=C(C(=O)CC(C4)(C)C)SC3=N2
+CdCl2,Cl[Cd]Cl
+CoCl2,Cl[Co]Cl
+CuSO4,[O-]S(=O)(=O)[O-].[Cu+2]
+DMAEC,CC(C1(C(C(C(C(O1)OC2C(OC(C(C2O)N)OC3C(OC(C(C3O)N)O)CO)CO)N)O)O)CO)N(C)C
+DMSO 4%,CS(=O)C
+FK506,CC1CC(C2C(CC(C(O2)(C(=O)C(=O)N3CCCCC3C(=O)OC(C(C(CC(=O)C(C=C(C1)C)CC=C)O)C)C(=CC4CCC(C(C4)OC)O)C)O)C)OC)OC
+FeCl4,Cl[Fe-](Cl)(Cl)Cl
+H2O2,OO
+HgCl2,Cl[Hg]Cl
+K2Cr2O7,[O-][Cr](=O)(=O)O[Cr](=O)(=O)[O-].[K+].[K+]
+L-dopa,C1=CC(=C(C=C1CC(C(=O)O)N)O)O
+LiCl,[Li+].[Cl-]
+MMS,COS(=O)(=O)C
+MPP+,C[N+]1=CC=C(C=C1)C2=CC=CC=C2
+MnCl2,Cl[Mn]Cl
+NaCl,[Na+].[Cl-]
+NaF,[F-].[Na+]
+PABA drop-out,C1=CC(=CC=C1C(=O)O)N
+RO 106-9920 (Calbio),O=S(C1=CC=CC=C1)C1=NN2N=NN=C2C=C1
+YP glycerol,C(C(CO)O)O
+ZnCl2,Cl[Zn]Cl
+acetic_acid,CC(=O)O
+aclacinomycin A,CCC1(CC(C2=C(C3=C(C=C2C1C(=O)OC)C(=O)C4=C(C3=O)C(=CC=C4)O)O)OC5CC(C(C(O5)C)OC6CC(C(C(O6)C)OC7CCC(=O)C(O7)C)O)N(C)C)O
+acriflavinium hydrochloride,C[N+]1=C2C=C(C=CC2=CC3=C1C=C(C=C3)N)N.[Cl-]
+adenine dropout,C1=NC2=NC=NC(=C2N1)N
+adenophostin A,C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)CO)OC4C(C(C(C(O4)CO)OP(=O)(O)O)OP(=O)(O)O)O)OP(=O)(O)O)N
+aklavin hydrochloride,CCC1(CC(C2=C(C3=C(C=C2C1C(=O)OC)C(=O)C4=C(C3=O)C(=CC=C4)O)O)OC5CC(C(C(O5)C)O)N(C)C)O.Cl
+alizarin,C1=CC=C2C(=C1)C(=O)C3=C(C2=O)C(=C(C=C3)O)O
+allyl disulfide,C=CCSSCC=C
+allyl sulfide,C=CCSCC=C
+alverine citrate,CCN(CCCC1=CC=CC=C1)CCCC2=CC=CC=C2.C(C(=O)O)C(CC(=O)O)(C(=O)O)O
+amphotericin B,CC1C=CC=CC=CC=CC=CC=CC=CC(CC2C(C(CC(O2)(CC(CC(C(CCC(CC(CC(=O)OC(C(C1O)C)C)O)O)O)O)O)O)O)C(=O)O)OC3C(C(C(C(O3)C)O)N)O
+amsacrine,COC1=C(C=CC(=C1)NS(=O)(=O)C)NC2=C3C=CC=CC3=NC4=CC=CC=C42
+angelicin,C1=CC2=C(C=CO2)C3=C1C=CC(=O)O3
+angelicin irradiated,C1=CC2=C(C=CO2)C3=C1C=CC(=O)O3
+arginine dropout,C(CC(C(=O)O)N)CN=C(N)N
+aureobasidin A,CCC(C)C1C(=O)N(C(C(=O)NC(C(=O)N(C(C(=O)OC(C(=O)N(C(C(=O)NC(C(=O)N(C(C(=O)N2CCCC2C(=O)N1)CC3=CC=CC=C3)C)CC4=CC=CC=C4)C(C)C)C)C(C)CC)C(C)(C)O)C)CC(C)C)C(C)C)C
+bathophenanthroline disulfonate,C1=CC=C(C=C1)OS(=O)(=O)C2=C3C=CC4=C(C=CN=C4C3=NC=C2)S(=O)(=O)OC5=CC=CC=C5
+benomyl,CCCCNC(=O)N1C2=CC=CC=C2N=C1NC(=O)OC
+benzaldehyde,C1=CC=C(C=C1)C=O
+berberine chloride,COC1=C(C2=C[N+]3=C(C=C2C=C1)C4=CC5=C(C=C4CC3)OCO5)OC.[Cl-]
+biotin partial drop-out,C1[C@H]2[C@@H]([C@@H](S1)CCCCC(=O)O)NC(=O)N2
+bisphenol,CC(C)(C1=CC=C(C=C1)O)C2=CC=C(C=C2)O
+bleomycin,CC1=C(N=C(N=C1N)[C@H](CC(=O)N)NC[C@@H](C(=O)N)N)C(=O)N[C@@H]([C@H](C2=CN=CN2)OC3C(C(C(C(O3)CO)O)O)OC4C(C(C(C(O4)CO)O)OC(=O)N)O)C(=O)N[C@H](C)[C@H]([C@H](C)C(=O)N[C@@H]([C@@H](C)O)C(=O)NCCC5=NC(=CS5)C6=NC(=CS6)C(=O)NCCC[S+](C)C)O��
+busulfan,CS(=O)(=O)OCCCCOS(=O)(=O)C
+calcium pantothenate partial drop-out,CC(C)(CO)[C@H](C(=O)NCCC(=O)[O-])O.CC(C)(CO)[C@H](C(=O)NCCC(=O)[O-])O.[Ca+2]
+calyculin A,C[C@H]1[C@@H](C[C@@]2(C([C@H]([C@H](O2)[C@H](C[C@@H]([C@H](C)[C@@H]([C@H](C)/C=C(\C)/C(=C/C=C/C(=C\C#N)/C)/C)O)O)OC)OP(=O)(O)O)(C)C)O[C@H]1C/C=C/C3=COC(=N3)[C@@H](C)CCNC(=O)[C@H]([C@H]([C@H](COC)N(C)C)O)O)O��
+camptothecin,CC[C@@]1(C2=C(COC1=O)C(=O)N3CC4=CC5=CC=CC=C5N=C4C3=C2)O
+cantharidin,C[C@@]12[C@H]3CC[C@@H]([C@@]1(C(=O)OC2=O)C)O3
+cantharidin disodium,C[C@]1([C@H]2CC[C@@H]([C@]1(C)C(=O)[O-])O2)C(=O)[O-].[Na+].[Na+]
+carboplatin,C1CC(C1)(C(=O)O)C(=O)O.[NH2-].[NH2-].[Pt+2]
+caspofungin,CCC(C)CC(C)CCCCCCCCC(=O)N[C@H]1C[C@H]([C@H](NC(=O)[C@@H]2[C@H](CCN2C(=O)[C@@H](NC(=O)[C@@H](NC(=O)[C@@H]3C[C@H](CN3C(=O)[C@@H](NC1=O)[C@@H](C)O)O)[C@@H]([C@H](C4=CC=C(C=C4)O)O)O)[C@@H](CCN)O)O)NCCN)O
+chlorambucil,C1=CC(=CC=C1CCCC(=O)O)N(CCCl)CCCl
+cisplatin,N.N.Cl[Pt]Cl
+clotrimazole,C1=CC=C(C=C1)C(C2=CC=CC=C2)(C3=CC=CC=C3Cl)N4C=CN=C4
+curcumin,COC1=C(C=CC(=C1)/C=C/C(=O)CC(=O)/C=C/C2=CC(=C(C=C2)O)OC)O
+cycloheximide,C[C@H]1C[C@@H](C(=O)[C@@H](C1)[C@@H](CC2CC(=O)NC(=O)C2)O)C
+floxuridine,C1[C@@H]([C@H](O[C@H]1N2C=C(C(=O)NC2=O)F)CO)O
+folic acid drop-out,C1=CC(=CC=C1C(=O)N[C@@H](CCC(=O)O)C(=O)O)NCC2=CN=C3C(=N2)C(=O)NC(=N3)N
+formestane,C[C@]12CCC(=O)C(=C1CC[C@@H]3[C@@H]2CC[C@]4([C@H]3CCC4=O)C)O
+hexestrol,CC[C@H](C1=CC=C(C=C1)O)[C@@H](CC)C2=CC=C(C=C2)O
+hydroxyurea,C(=O)(N)NO
+hygromycin,C/C(=C\C1=CC(=C(C=C1)O[C@H]2[C@H]([C@@H]([C@H](O2)C(=O)C)O)O)O)/C(=O)N[C@@H]3[C@H]([C@@H]([C@H]4[C@@H]([C@H]3O)OCO4)O)O
+indirubin,C1=CC=C2C(=C1)C(=C(N2)O)C3=NC4=CC=CC=C4C3=O
+inositol drop-out,C1(C(C(C(C(C1O)O)O)O)O)O
+isoleucine dropout,CC[C@H](C)[C@@H](C(=O)O)N
+latrunculin,C[C@H]/1CC[C@@H]2C[C@H](C[C@@](O2)([C@@H]3CSC(=O)N3)O)OC(=O)/C=C(\CC/C=C1)/C
+lovastatin,CC[C@H](C)C(=O)O[C@H]1C[C@H](C=C2[C@H]1[C@H]([C@H](C=C2)C)CC[C@@H]3C[C@H](CC(=O)O3)O)C
+lysine dropout,C(CCN)C[C@@H](C(=O)O)N
+mebendazole,COC(=O)NC1=NC2=C(N1)C=C(C=C2)C(=O)C3=CC=CC=C3
+mechlorethamine,CN(CCCl)CCCl
+melphalan,C1=CC(=CC=C1C[C@@H](C(=O)O)N)N(CCCl)CCCl
+methotrexate,CN(CC1=CN=C2C(=N1)C(=NC(=N2)N)N)C3=CC=C(C=C3)C(=O)N[C@@H](CCC(=O)O)C(=O)O
+methoxsalen,COC1=C2C(=CC3=C1OC=C3)C=CC(=O)O2
+miconazole,C1=CC(=C(C=C1Cl)Cl)COC(CN2C=CN=C2)C3=C(C=C(C=C3)Cl)Cl
+mitomycin c,CC1=C(C(=O)C2=C(C1=O)N3C[C@H]4[C@@H]([C@@]3([C@@H]2COC(=O)N)OC)N4)N
+mycophenolic acid,CC1=C2COC(=O)C2=C(C(=C1OC)C/C=C(\C)/CCC(=O)O)O
+myriocin,CCCCCCC(=O)CCCCCC/C=C/C[C@H]([C@@H]([C@@](CO)(C(=O)O)N)O)O
+niacin drop-out,C1=CC(=CN=C1)C(=O)O
+nitric_oxide,[N]=O
+nocodazole,COC(=O)NC1=NC2=C(N1)C=C(C=C2)C(=O)C3=CC=CS3
+glucose,C(C1C(C(C(C(O1)O)O)O)O)O
+ethanol,CCO
+glycerol,C(C(CO)O)O
+sorbitol,C(C(C(C(C(CO)O)O)O)O)O
+ribose,C1C(C(C(C(O1)O)O)O)O
+xylose,C1C(C(C(C(O1)O)O)O)O
+formamide,C(=O)N
+SDS,CCCCCCCCCCCCOS(=O)(=O)[O-].[Na+]
+KCl,[Cl-].[K+]
+anisomycin-3,CC(=O)OC1C(CNC1CC2=CC=C(C=C2)OC)O
+6-azauracil,C1=NNC(=O)NC1=O
+nystatin,CC1C=CC=CCCC=CC=CC=CC=CC(CC2C(C(CC(O2)(CC(C(CCC(CC(CC(CC(=O)OC(C(C1O)C)C)O)O)O)O)O)O)O)C(=O)O)OC3C(C(C(C(O3)C)O)N)O
+methylviologen,C[N+]1=CC=C(C=C1)C2=CC=[N+](C=C2)C.[Cl-].[Cl-]
+fluconazole,C1=CC(=C(C=C1F)F)C(CN2C=NC=N2)(CN3C=NC=N3)O
+ketoconazole,CC(=O)N1CCN(CC1)C2=CC=C(C=C2)OC[C@H]3CO[C@](O3)(CN4C=CN=C4)C5=C(C=C(C=C5)Cl)Cl
+tebuconazole,CC(C)(C)C(CCC1=CC=C(C=C1)Cl)(CN2C=NC=N2)O
+tyrosol,C1=CC(=CC=C1CCO)O
+paraquat,C[N+]1=CC=C(C=C1)C2=CC=[N+](C=C2)C
+caffeine,CN1C=NC2=C1C(=O)N(C(=O)N2C)C
+galactose,C(C1C(C(C(C(O1)O)O)O)O)O
+smt,[O-][As]=O.[Na+]
+lactate,CC(C(=O)[O-])O
+MgCl2,[Mg+2].[Cl-].[Cl-]
+indoleacetic_acid,C1=CC=C2C(=C1)C(=CN2)CC(=O)O
+neomycin,C1C(C(C(C(C1N)OC2C(C(C(C(O2)CN)O)O)N)OC3C(C(C(O3)CO)OC4C(C(C(C(O4)CN)O)O)N)O)O)N
+menadione,CC1=CC(=O)C2=CC=CC=C2C1=O
+diamide,CN(C)C(=O)N=NC(=O)N(C)C
+trehalose,C(C1C(C(C(C(O1)OC2C(C(C(C(O2)CO)O)O)O)O)O)O)O
+lactose,C(C1C(C(C(C(O1)OC2C(OC(C(C2O)O)O)CO)O)O)O)O
+raffinose,C(C1C(C(C(C(O1)OCC2C(C(C(C(O2)OC3(C(C(C(O3)CO)O)O)CO)O)O)O)O)O)O)O
+berbamine,CN1CCC2=CC(=C3C=C2C1CC4=CC=C(C=C4)OC5=C(C=CC(=C5)CC6C7=C(O3)C(=C(C=C7CCN6C)OC)OC)O)OC
+zeocin,CC1=C(N=C(N=C1N)C(CC(=O)N)NCC(C(=O)N)N)C(=O)NC(C(C2=CN=CN2)OC3C(C(C(C(O3)CO)O)O)OC4C(C(C(C(O4)CO)O)OC(=O)N)O)C(=O)NC(C)C(C(C)C(=O)NC(C(C)O)C(=O)NCCC5=NC(CS5)C6=NC(=CS6)C(=O)NCCCCN=C(N)N)O
+MnSO4,O.[O-]S(=O)(=O)[O-].[Mn+2]
+congo_red,C1=CC=C2C(=C1)C(=CC(=C2N)N=NC3=CC=C(C=C3)C4=CC=C(C=C4)N=NC5=C(C6=CC=CC=C6C(=C5)S(=O)(=O)[O-])N)S(=O)(=O)[O-].[Na+].[Na+]
+egta,C(COCCOCCN(CC(=O)O)CC(=O)O)N(CC(=O)O)CC(=O)O
+fructose,C1C(C(C(C(O1)(CO)O)O)O)O
+mannose,C(C1C(C(C(C(O1)O)O)O)O)O
+maltose,C(C1C(C(C(C(O1)OC2C(OC(C(C2O)O)O)CO)O)O)O)O
+sucrose,C(C1C(C(C(C(O1)OC2(C(C(C(O2)CO)O)O)CO)O)O)O)O
+tunicamycin,CC(C)CCCCCCCCCCC=CC(=O)NC1C(C(C(OC1OC2C(C(C(C(O2)CO)O)O)NC(=O)C)CC(C3C(C(C(O3)N4C=CC(=O)NC4=O)O)O)O)O)O
+MgSO4,[O-]S(=O)(=O)[O-].[Mg+2]
+hydroxybenzaldehyde,C1=CC=C(C(=C1)C=O)O
+fluorouracil,C1=C(C(=O)NC(=O)N1)F
+fluorocytosine,C1=NC(=O)NC(=C1F)N
+hydroquinone,C1=CC(=CC=C1O)O
+copper,[Cu]
+CaCl2,[Cl-].[Cl-].[Ca+2]
+ammonium_sulphate,[NH4+].[NH4+].[O-]S(=O)(=O)[O-]

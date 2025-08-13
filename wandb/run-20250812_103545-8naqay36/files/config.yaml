@@ -1,0 +1,64 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            ho1uqmyqfwfhv9jyplo53poqpemcgwpi:
+                cpu_count: 8
+                cpu_count_logical: 16
+                disk:
+                    /:
+                        total: "1006896148480"
+                        used: "243883540480"
+                email: da24c011@smail.iitm.ac.in
+                executable: C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\code\Rajeeva-IITM-yeast_growth_pred-3b6ddde\.venv\Scripts\python.exe
+                host: DESKTOP-E7MJP9I
+                memory:
+                    total: "7893950464"
+                os: Windows-10-10.0.26100-SP0
+                program: <python with no main file>
+                python: CPython 3.10.11
+                root: .
+                startedAt: "2025-08-12T05:05:45.135717Z"
+                writerId: ho1uqmyqfwfhv9jyplo53poqpemcgwpi
+        m:
+            - "1": trainer/global_step
+              "6":
+                - 3
+              "7": []
+            - "2": '*'
+              "5": 1
+              "6":
+                - 1
+              "7": []
+        python_version: 3.10.11
+        t:
+            "1":
+                - 1
+                - 5
+                - 50
+                - 53
+                - 106
+            "2":
+                - 1
+                - 5
+                - 50
+                - 53
+                - 106
+            "3":
+                - 7
+                - 13
+                - 66
+            "4": 3.10.11
+            "5": 0.21.0
+            "8":
+                - 3
+            "12": 0.21.0
+            "13": windows-amd64
+batch_size:
+    value: 32
+fold:
+    value: 1
+learning_rate:
+    value: 0.0001
+num_epochs:
+    value: 100
