@@ -27,15 +27,13 @@ from main_code.FGR.src.data.components.utils import (
 from main_code.FGR.src.models.fgr_module import FGRPretrainLitModule
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # folder where this script lives
 
 #PROJECT_DIR = Path("C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\code\Rajeeva-IITM-yeast_growth_pred-3b6ddde\main_code\FGR").resolve()
 
-fgroups = pd.read_parquet(r"C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\code\Rajeeva-IITM-yeast_growth_pred-3b6ddde\main_code\FGR\fg.parquet")[
-    "SMARTS"
-].tolist()  # Get functional groups
+fgroups = pd.read_parquet((os.path.join(BASE_DIR,"fg.parquet")))["SMARTS"].tolist()
 fgroups_list = [MolFromSmarts(x) for x in fgroups]  # Convert to RDKit Mol
-tokenizer = Tokenizer.from_file(r"C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\code\Rajeeva-IITM-yeast_growth_pred-3b6ddde\main_code\FGR\tokenizers\BPE_pubchem_500.json")
+tokenizer = Tokenizer.from_file((os.path.join(BASE_DIR,"tokenizers", "BPE_pubchem_500.json")))
 def get_representation(
     smiles: List[str],
     method: str,
