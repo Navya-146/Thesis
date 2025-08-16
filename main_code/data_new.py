@@ -6,7 +6,11 @@ import pandas as pd
 from rdkit.Chem.rdmolfiles import MolFromSmarts
 from tokenizers import Tokenizer
 from omegaconf import OmegaConf
+import os
 
+PROJECT_PATH = "/home/da24c011/miniconda3/project/"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # folder where this script lives
 # Your imports for FGR model and get_representation
 from main_code.FGR.load_FGR import get_fgr_model, get_representation
 
@@ -73,22 +77,22 @@ class DrugOmicsDataModule(LightningDataModule):
         self.gene_orders = {}
 
         # Load expression
-        df_expr = pd.read_csv(f"{data_dir}/raw data from colab/expression_wo_cosmic.csv", index_col=0)
+        df_expr = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "expression_wo_cosmic.csv"))), index_col=0)
         self.omics["expr"] = df_expr.to_dict(orient="index")
         self.gene_orders["expr"] = list(df_expr.columns)
 
         # Load mutation
-        df_mut = pd.read_csv(f"{data_dir}/raw data from colab/mutation_wo_cosmic.csv", index_col=0)
+        df_mut = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "mutation_wo_cosmic.csv"))), index_col=0)
         self.omics["mut"] = df_mut.to_dict(orient="index")
         self.gene_orders["mut"] = list(df_mut.columns)
 
         # Load methylation
-        df_meth = pd.read_csv(f"{data_dir}/raw data from colab/methylation_wo_cosmic.csv", index_col=0)
+        df_meth = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "methylation_wo_mean_cosmic.csv"))), index_col=0)
         self.omics["meth"] = df_meth.to_dict(orient="index")
         self.gene_orders["meth"] = list(df_meth.columns)
 
         # Load CNV
-        df_cnv = pd.read_csv(f"{data_dir}/raw data from colab/cnv_wo_cosmic.csv", index_col=0)
+        df_cnv = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "cnv_wo_cosmic.csv"))), index_col=0)
         self.omics["cnv"] = df_cnv.to_dict(orient="index")
         self.gene_orders["cnv"] = list(df_cnv.columns)
 
@@ -96,16 +100,16 @@ class DrugOmicsDataModule(LightningDataModule):
 
 
         # Load drug SMILES dictionary
-        drug_smiles_df = pd.read_csv(f"{data_dir}/drug_smiles.tsv", sep="\t", index_col=0)
+        drug_smiles_df = pd.read_csv((os.path.join(PROJECT_PATH, "data to be used", "drug_smiles.csv")), sep="\t", index_col=0)
         self.drug_dict = drug_smiles_df["SMILES"].to_dict()
 
         # Load functional groups and tokenizer
-        fgroups = pd.read_parquet(f"{data_dir}/fg.parquet")["SMARTS"].tolist()
+        fgroups = pd.read_parquet((os.path.join(BASE_DIR, "fg.parquet")))["SMARTS"].tolist()
         self.fgroups_list = [MolFromSmarts(x) for x in fgroups]
-        self.tokenizer = Tokenizer.from_file(f"{data_dir}/tokenizers/BPE_pubchem_500.json")
+        self.tokenizer = Tokenizer.from_file((os.path.join(BASE_DIR,"tokenizers", "BPE_pubchem_500.json")))
 
         # Load full dataframe with drug, cell line, IC50
-        self.full_df = pd.read_csv(f"{data_dir}/fin_ic50_21-7.csv")
+        self.full_df = pd.read_csv((os.path.join(PROJECT_PATH, "data to be used", "fin_ic50_21-7.csv")))
 
         # Train/val/test split proportions
         self.split = train_val_test_split
