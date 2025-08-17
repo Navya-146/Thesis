@@ -19,14 +19,13 @@ from main_code.FGR.load_FGR import get_fgr_model, get_representation
 # -----------------------
 class DrugOmicsIC50Dataset(Dataset):
     def __init__(self, df, drug_encoder, omics_data, drug_dict, tokenizer, 
-                 fgroups_list, gene_orders, omics_input_sizes):
+                 fgroups_list, omics_input_sizes):
         self.df = df.reset_index(drop=True)
         self.encoder = drug_encoder.eval()
         self.omics = omics_data  # dict of modality_name -> dataframe or array
         self.drugs = {str(k).strip().lower(): v for k, v in drug_dict.items()}
         self.tokenizer = tokenizer
         self.fgroups_list = fgroups_list
-        self.gene_orders = gene_orders
         self.omics_input_sizes = omics_input_sizes  # [exp_dim, cnv_dim, mut_dim, meth_dim]
 
     def __len__(self):
