@@ -4,7 +4,7 @@
 import sys
 import os
 from pathlib import Path
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
 
 import torch
 import pandas as pd
@@ -79,24 +79,25 @@ print("encoder loaded!")
 
 seed_everything(SEED)
 train_val_df, test_df = train_test_split(
-    full_df, test_size=0.2, random_state=SEED, shuffle=True
+    full_df, test_size=0.2, stratify=full_df["TCGA cancer type"], random_state=SEED, shuffle=True
 )
 
 
-kf = KFold(n_splits=NUM_FOLDS, shuffle=True, random_state=SEED)
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+y_strat = train_val_df["TCGA cancer type"]
 
 # Training loop
 
-for fold, (train_idx, val_idx) in enumerate(kf.split(train_val_df)):
+for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     print(f"\n--- Fold {fold + 1}/{NUM_FOLDS} ---")
 
     train_df = train_val_df.iloc[train_idx].reset_index(drop=True)
     val_df = train_val_df.iloc[val_idx].reset_index(drop=True)
 
-    train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, gene_orders, INPUT_SIZE)
-    val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, gene_orders, INPUT_SIZE)
+    train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
+    val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=80)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=60)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
 
     # Initialize model 
@@ -151,6 +152,7 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(train_val_df)):
         callbacks=[checkpoint_callback, early_stop_callback],
         accelerator="gpu",
         devices=1,
+        precision=16
     )
 
     trainer.fit(model=lightning_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
