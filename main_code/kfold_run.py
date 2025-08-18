@@ -152,7 +152,6 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         callbacks=[checkpoint_callback, early_stop_callback],
         accelerator="gpu",
         devices=1,
-        precision=16
     )
 
     trainer.fit(model=lightning_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -166,7 +165,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
 print("\n--- Running final testing ---")
 
 
-test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, gene_orders, INPUT_SIZE)
+test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
 
 # Load best checkpoint
