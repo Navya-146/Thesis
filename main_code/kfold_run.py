@@ -28,7 +28,7 @@ NUM_EPOCHS = 15
 LR = 1e-4
 DROPOUT = 0.2
 INPUT_SIZE = [256, 12798, 12798, 12798, 12798] # drug, expr, cnv, mut, meth
-USE_OMICS = [True, False, False, False]
+USE_OMICS = [False, False, True, False]
 OUTPUT_SIZE = 1
 LAYERS_BEFORE_COMB = [2048, 1024, 512, 256]
 LAYERS_AFTER_COMB = [256, 64, 32]
@@ -39,11 +39,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FGR_CKPT_PATH = os.path.join(PROJECT_PATH, "checkpoints", "epoch_000_val_0.8505.ckpt")
 
 #FGR_CKPT_PATH = r"C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\checkpoints\epoch_000_val_0.8505.ckpt"
-PROJECT_NAME = "expr_concat" #omics_comb_cv_fold
+PROJECT_NAME = "mutation_concat" #omics_comb_cv_fold
 CHECKPOINT_DIR = f"checkpoints_cv/{PROJECT_NAME}" 
 
 
-RUN_NAME_BASE = "multiviewnet_cv_fold" 
+RUN_NAME_BASE = "cv_fold" 
 
 #data 
 full_df = pd.read_csv((os.path.join(PROJECT_PATH, "data to be used", "fin_ic50_21-7.csv")))
@@ -152,6 +152,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         callbacks=[checkpoint_callback, early_stop_callback],
         accelerator="gpu",
         devices=1,
+        precision = 16
     )
 
     trainer.fit(model=lightning_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -201,7 +202,7 @@ test_model_base = MultiViewNet(
 test_lightning_model = IC50LightningModel.load_from_checkpoint(best_checkpoint_path, model=test_model_base)
 test_lightning_model.eval()
 
-test_trainer = Trainer(accelerator="gpu", devices=1)
+test_trainer = Trainer(accelerator="gpu", devices=1, precision=16)
 
 with torch.no_grad():
     results = test_trainer.test(model=test_lightning_model, dataloaders=test_loader)
