@@ -30,8 +30,8 @@ DROPOUT = 0.2
 INPUT_SIZE = [256, 12798, 12798, 12798, 12798] # drug, expr, cnv, mut, meth
 USE_OMICS = [False, False, True, False]
 OUTPUT_SIZE = 1
-LAYERS_BEFORE_COMB = [2048, 1024, 512, 256]
-LAYERS_AFTER_COMB = [256, 64, 32]
+LAYERS_BEFORE_COMB = [256, 100] #as per deep aeg    
+LAYERS_AFTER_COMB = [300,1]     #as per deep aeg
 COMB_TYPE = "concatenation" #or concatenation
 
 PROJECT_PATH = "/home/da24c011/miniconda3/project/"
@@ -108,7 +108,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         input_size=INPUT_SIZE,
         output_size=OUTPUT_SIZE,
         dropout=DROPOUT,
-        activation="relu",
+        activation="tanh",    #as per deepaeg for mutation
         comb=COMB_TYPE,
         fgr_encoder = encoder
     )
