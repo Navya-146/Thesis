@@ -19,7 +19,8 @@ from main_code.FGR.load_FGR import get_fgr_model, get_representation
 # -----------------------
 class DrugOmicsIC50Dataset(Dataset):
     def __init__(self, df, drug_encoder, omics_data, drug_dict, tokenizer, 
-                 fgroups_list, omics_input_sizes):
+                 fgroups_list, omics_input_sizes, task="regression",
+                 ic50_threshold=None):
         self.df = df.reset_index(drop=True)
         self.encoder = drug_encoder.eval()
         self.omics = omics_data  # dict of modality_name -> dataframe or array
@@ -27,6 +28,8 @@ class DrugOmicsIC50Dataset(Dataset):
         self.tokenizer = tokenizer
         self.fgroups_list = fgroups_list
         self.omics_input_sizes = omics_input_sizes  # [exp_dim, cnv_dim, mut_dim, meth_dim]
+        self.task = task
+        self.threshold = ic50_threshold
 
     def __len__(self):
         return len(self.df)
@@ -52,8 +55,15 @@ class DrugOmicsIC50Dataset(Dataset):
             omics_views.append(omics_vector)
 
         # ---- Target ----
-        target = torch.tensor(row["LN_IC50"], dtype=torch.float32)
-
+        if self.task == "regression":
+            target = torch.tensor(row["LN_IC50"], dtype=torch.float32)
+        elif self.task == "classification":
+            if self.ic50_threshold is None:
+                raise ValueError("ic50_threshold must be set for classification task.")
+            target = torch.tensor(int(row["LN_IC50"] <= self.threshold),dtype=torch.long)
+        else:
+            raise ValueError(f"Unknown task type {self.task}")
+        
         return torch.from_numpy(drug_rep).float(), *omics_views, target
 
 
@@ -64,12 +74,14 @@ class DrugOmicsIC50Dataset(Dataset):
 # DataModule
 # -----------------------
 class DrugOmicsDataModule(LightningDataModule):
-    def __init__(self, data_dir, drug_encoder, train_val_test_split, batch_size, num_workers):
+    def __init__(self, data_dir, drug_encoder, train_val_test_split, batch_size, num_workers, task="regression", ic50_threshold=None):
         super().__init__()
         self.data_dir = data_dir
         self.drug_encoder = drug_encoder.eval()
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.task = task
+        self.threshold = ic50_threshold
 
         # Load omics data once here
         self.omics = {}
@@ -94,9 +106,6 @@ class DrugOmicsDataModule(LightningDataModule):
         df_cnv = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "cnv_wo_cosmic.csv"))), index_col=0)
         self.omics["cnv"] = df_cnv.to_dict(orient="index")
         self.gene_orders["cnv"] = list(df_cnv.columns)
-
-
-
 
         # Load drug SMILES dictionary
         drug_smiles_df = pd.read_csv((os.path.join(PROJECT_PATH, "data to be used", "drug_smiles.csv")), sep="\t", index_col=0)
@@ -129,14 +138,11 @@ class DrugOmicsDataModule(LightningDataModule):
             test_df = df.iloc[val_end:].reset_index(drop=True)
 
             self.train_set = DrugOmicsIC50Dataset(
-                train_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list, self.gene_orders
-            )
+                train_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list, self.task, self.threshold)
             self.valid_set = DrugOmicsIC50Dataset(
-                val_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list, self.gene_orders
-            )
+                val_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list,self.task, self.threshold)
             self.test_set = DrugOmicsIC50Dataset(
-                test_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list, self.gene_orders
-            )
+                test_df, self.drug_encoder, self.omics, self.drug_dict, self.tokenizer, self.fgroups_list, self.task,self.threshold)
 
 
     def train_dataloader(self):
