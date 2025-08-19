@@ -6,7 +6,7 @@ from torch import nn
 from main_code.FGR.load_FGR import get_fgr_model
 
 from typing import List
-
+from sklearn.metrics import r2_score
 import torch
 from torch import nn
 from lightning import LightningModule
@@ -35,7 +35,8 @@ class MultiViewNet(nn.Module):
         output_size: int,
         dropout: float = 0.2,
         activation: str = "relu",
-        comb: str = "concatenation",
+        comb: str = "concatenation",   #or attention
+        task: str = "regression",      #or classification
         fgr_encoder = nn.Module
     ):
         super().__init__()
@@ -58,17 +59,16 @@ class MultiViewNet(nn.Module):
         self.output_size = output_size
         self.dropout = dropout
         self.comb = comb
+        self.task = task
         self.fgr_encoder = fgr_encoder.eval()
         for param in self.fgr_encoder.parameters():
             param.requires_grad = False
 
-        # number of active branches (drug + enabled omics)
         self.num_omics_enabled = sum(1 for u in use_omics if u)
         if self.num_omics_enabled < 1:
             raise ValueError("At least one omics modality must be enabled in 'use_omics'.")
         self.num_modalities = 1 + self.num_omics_enabled  # drug + active omics
 
-        # Activation
         if activation == "relu":
             self.activation = nn.ReLU()
         elif activation == "tanh":
@@ -82,45 +82,33 @@ class MultiViewNet(nn.Module):
         else:
             raise ValueError(f"Unsupported activation: {activation}")
         
-        
-
-        # --- Pre-concat blocks ---
-        # We'll create one block for drug (project drug latent into same final pre-concat dim),
-        # and one block for each omics modality (input_size[1:]).
-        # Each block maps its input -> layers_before_comb[-1] (through the provided layers_before_comb sequence).
-        self.drug_branch = self._make_pre_concat_block(input_size[0], layers_before_comb)
-
-        # create omics branches list in the given order
         omics_input_sizes = input_size[1:]
         self.omics_branches = nn.ModuleList(
             [ self._make_pre_concat_block(in_dim, layers_before_comb) for in_dim in omics_input_sizes ]
         )
 
         # --- Fusion config ---
-        # For attention, we'll use a learnable per-modality scalar (same as your previous design)
         if comb == "attention":
             # one weight per active modality
             self.attn_weights = nn.Parameter(torch.randn(self.num_modalities))
             fused_dim = layers_before_comb[-1]
         else:  # concatenation
             fused_dim = self.num_modalities * layers_before_comb[-1]
-
-        # --- Post-concat block ---
+            
         self.postconcat = self._make_post_concat_block(fused_dim, layers_after_comb, dropout, self.activation)
 
     def _make_pre_concat_block(self, input_dim, layers_before_comb):
         """Create MLP that maps input_dim -> layers_before_comb[-1] using the sequence in layers_before_comb."""
         layers = []
-        # first layer: input_dim -> layers_before_comb[0]
         layers.append(nn.Linear(input_dim, layers_before_comb[0], dtype=torch.float))
         layers.append(nn.BatchNorm1d(layers_before_comb[0], dtype=torch.float))
         layers.append(self.activation)
-        # intermediate layers (if any)
+        
         for i in range(len(layers_before_comb) - 2):
             layers.append(nn.Linear(layers_before_comb[i], layers_before_comb[i+1], dtype=torch.float))
             layers.append(nn.BatchNorm1d(layers_before_comb[i+1], dtype=torch.float))
             layers.append(self.activation)
-        # final mapping to last element
+
         if len(layers_before_comb) >= 2:
             layers.append(nn.Dropout(self.dropout))
             layers.append(nn.Linear(layers_before_comb[-2], layers_before_comb[-1], dtype=torch.float))
@@ -139,7 +127,13 @@ class MultiViewNet(nn.Module):
         if len(layers_after_comb) >= 2:
             layers.append(nn.Linear(layers_after_comb[-2], layers_after_comb[-1], dtype=torch.float))
         layers.append(nn.Dropout(dropout))
-        layers.append(nn.Linear(layers_after_comb[-1], self.output_size, dtype=torch.float))
+        
+        if self.task == "regression":
+            layers.append(nn.Linear(layers_after_comb[-1], self.output_size, dtype=torch.float))
+        elif self.task == "classification":
+            layers.append(nn.Linear(layers_after_comb[-1], self.output_size, dtype=torch.float))
+        else:
+            raise ValueError(f"Unsupported task: {self.task}")
         return nn.Sequential(*layers)
 
     def attention_fuse(self, views: List[torch.Tensor]) -> torch.Tensor:
@@ -162,11 +156,6 @@ class MultiViewNet(nn.Module):
         The model only processes omics branches where use_omics[i] is True (the branch was created).
         The dataset may pass all tensors; model will ignore those for which use_omics is False.
         """
-
-        # Build list of omics inputs in the same order as self.omics_branches
-        drug_input = drug_input.squeeze(1)
-        drug_features = self.fgr_encoder(drug_input)
-
         omics_inputs = [exp, cnv, mut, meth]
         if len(omics_inputs) != len(self.omics_branches):
             raise RuntimeError("Unexpected number of omics inputs provided to forward()")
@@ -208,12 +197,19 @@ class MultiViewNet(nn.Module):
 
 
 class IC50LightningModel(LightningModule):
-    def __init__(self, model: nn.Module, lr=1e-4):
+    def __init__(self, model: nn.Module, lr=1e-4, task = "regression"):
         super().__init__()
         self.model = model
         self.lr = lr
-        self.loss_fn = nn.MSELoss()
+        self.task = task
         #self.save_hyperparameters(ignore=["fgr_encoder", "tokenizer"])
+
+        if task == "regression":
+            self.loss_fn = nn.MSELoss()
+        elif task == "classification":
+            self.loss_fn = nn.BCEWithLogitsLoss()  # binary
+        else:
+            raise ValueError(f"Unsupported task: {task}")
 
 
     def forward(self, drug_vec, exp=None, cnv=None, mut=None, meth=None):
@@ -222,29 +218,37 @@ class IC50LightningModel(LightningModule):
 
     def _shared_step(self, batch, stage):
         drug_vec, exp, cnv, mut, meth, label = batch
-
         pred = self(drug_vec, exp, cnv, mut, meth)
-        pred = pred.squeeze(-1) 
-        loss = self.loss_fn(pred, label)
 
-        y_true = label.detach().cpu().numpy()
-        y_pred = pred.detach().cpu().numpy()
-        from sklearn.metrics import r2_score
+        if self.task=="regression":
+            pred = pred.squeeze(-1) 
+            loss = self.loss_fn(pred, label)
 
+            y_true = label.detach().cpu().numpy()
+            y_pred = pred.detach().cpu().numpy()
+            
+            r2 = r2_score(y_true, y_pred)
+            n = y_true.shape[0]
+            omics_views = [exp, cnv, mut, meth]
+            p = sum(tensor.shape[1] for tensor in omics_views if tensor is not None)
+    
+            adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1) if n > p + 1 else r2
+    
+    
+            self.log(f"{stage}/loss_mse", loss, prog_bar=True)
+            self.log(f"{stage}/r2", r2, prog_bar=True)
+            self.log(f"{stage}/adj_r2", adj_r2, prog_bar=True)
 
+        elif self.task=="classification":
+            loss = self.loss_fn(pred, label.float().unsqueeze(1))
+            probs = torch.sigmoid(pred)
+            y_hat = (probs > 0.5).long()
+            acc = (y_hat == label.view_as(y_hat)).float().mean()
+            self.log(f"{stage}/loss_ce", loss, prog_bar=True)
+            self.log(f"{stage}/acc", acc, prog_bar=True)
 
-        r2 = r2_score(y_true, y_pred)
-        n = y_true.shape[0]
-        omics_views = [exp, cnv, mut, meth]
-        p = sum(tensor.shape[1] for tensor in omics_views if tensor is not None)
-
-        adj_r2 = 1 - (1 - r2) * (n - 1) / (n - p - 1) if n > p + 1 else r2
-
-
-        self.log(f"{stage}/loss_mse", loss, prog_bar=True)
-        self.log(f"{stage}/r2", r2, prog_bar=True)
-        self.log(f"{stage}/adj_r2", adj_r2, prog_bar=True)
-
+        else:
+            raise ValueError(f"Unsupported Task: {self.task}")
         return loss
 
     def training_step(self, batch, batch_idx):
