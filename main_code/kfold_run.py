@@ -32,17 +32,25 @@ USE_OMICS = [False, False, True, False]
 OUTPUT_SIZE = 1
 LAYERS_BEFORE_COMB = [256, 100] #as per deep aeg    
 LAYERS_AFTER_COMB = [300,1]     #as per deep aeg
-COMB_TYPE = "concatenation" #or concatenation
+COMB_TYPE = "concatenation" #or attention
+TASK = "regression" #or classification
+THRESHOLD = 0.0 #specify for classification task
+
+if TASK == "regression":
+    monitor_metric = "val/r2"
+elif TASK == "classification":
+    monitor_metric = "val/accuracy" 
+else:
+    raise ValueError(f"Unknown TASK {TASK}")
+
 
 PROJECT_PATH = "/home/da24c011/miniconda3/project/"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
 FGR_CKPT_PATH = os.path.join(PROJECT_PATH, "checkpoints", "epoch_000_val_0.8505.ckpt")
 
 #FGR_CKPT_PATH = r"C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\checkpoints\epoch_000_val_0.8505.ckpt"
-PROJECT_NAME = "mutation_concat" #omics_comb_cv_fold
+PROJECT_NAME = f"mutation_{COMB_TYPE[:6]}_{TASK[:7]}" #omics_comb_task
 CHECKPOINT_DIR = f"checkpoints_cv/{PROJECT_NAME}" 
-
-
 RUN_NAME_BASE = "cv_fold" 
 
 #data 
@@ -72,7 +80,6 @@ print("data loaded!")
 full_df = full_df[full_df['DRUG_NAME'].isin(drug_dict.keys())].reset_index(drop=True)
 
 #encoder
-
 fgr_encoder = get_fgr_module(FGR_CKPT_PATH)
 encoder = fgr_encoder.net.encoder
 print("encoder loaded!")
@@ -94,8 +101,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     train_df = train_val_df.iloc[train_idx].reset_index(drop=True)
     val_df = train_val_df.iloc[val_idx].reset_index(drop=True)
 
-    train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
-    val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
+    train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
+    val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=60)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
@@ -110,9 +117,10 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         dropout=DROPOUT,
         activation="tanh",    #as per deepaeg for mutation
         comb=COMB_TYPE,
-        fgr_encoder = encoder
+        fgr_encoder = encoder,
+        task = TASK
     )
-    lightning_model = IC50LightningModel(base_model, lr=LR)
+    lightning_model = IC50LightningModel(base_model, lr=LR, task=TASK)
 
     # WandB logger
     wandb_logger = WandbLogger(
@@ -128,19 +136,20 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         "learning_rate": LR,
     })
 
+
     # Setup checkpoint callback
     checkpoint_callback = ModelCheckpoint(
-        monitor="val/r2",
+        monitor = monitor_metric,
         mode="max",
         save_top_k=1,
-        filename=f"fold{fold + 1}-best-r2-{{epoch:02d}}-{{val/r2:.4f}}",
+        filename=f"fold{fold + 1}-best-{monitor_metric}-{{epoch:02d}}-{{{monitor_metric}:.4f}}",
         dirpath=os.path.join(CHECKPOINT_DIR, f"fold_{fold + 1}"),
         verbose=True,
     )
 
     # Early stopping callback
     early_stop_callback = EarlyStopping(
-        monitor="val/r2",
+        monitor=monitor_metric,
         patience=10,
         mode="max",
         verbose=True,
@@ -150,15 +159,13 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         max_epochs=NUM_EPOCHS,
         logger=wandb_logger,
         callbacks=[checkpoint_callback, early_stop_callback],
-        accelerator="gpu",
+        accelerator="auto",
         devices=1,
         precision = 16
     )
 
     trainer.fit(model=lightning_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-
     wandb_logger.experiment.finish()
-
     print(f"Best checkpoint for fold {fold + 1} saved at: {checkpoint_callback.best_model_path}")
 
 
@@ -166,13 +173,19 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
 print("\n--- Running final testing ---")
 
 
-test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE)
+test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
 
 # Load best checkpoint
 best_checkpoint_path = checkpoint_callback.best_model_path
 print(f"Loading model from checkpoint: {best_checkpoint_path}")
 
+test_lightning_model = IC50LightningModel.load_from_checkpoint(best_checkpoint_path)
+test_lightning_model.eval()
+test_trainer = Trainer(accelerator="gpu", devices=1, precision=16)
+
+with torch.no_grad():
+    results = test_trainer.test(model=test_lightning_model, dataloaders=test_loader)
 
 wandb_logger = WandbLogger(
     project=PROJECT_NAME,
@@ -180,32 +193,16 @@ wandb_logger = WandbLogger(
     log_model=False,
 )
 
-wandb_logger.log_metrics({
-    "test/r2": results[0]["test/r2"],
-    "test/loss_mse": results[0]["test/loss_mse"],
-    "test/adj_r2": results[0]["test/adj_r2"]
-})
-
-
-test_model_base = MultiViewNet(
-    layers_before_comb=LAYERS_BEFORE_COMB,
-    layers_after_comb=LAYERS_AFTER_COMB,
-    use_omics=USE_OMICS,
-    input_size=INPUT_SIZE,
-    output_size=OUTPUT_SIZE,
-    dropout=DROPOUT,
-    activation="relu",
-    comb=COMB_TYPE,
-    fgr_encoder = encoder
-)
-
-test_lightning_model = IC50LightningModel.load_from_checkpoint(best_checkpoint_path, model=test_model_base)
-test_lightning_model.eval()
-
-test_trainer = Trainer(accelerator="gpu", devices=1, precision=16)
-
-with torch.no_grad():
-    results = test_trainer.test(model=test_lightning_model, dataloaders=test_loader)
+if TASK == "regression":
+    wandb_logger.log_metrics({
+        "test/r2": results[0]["test/r2"],
+        "test/loss_mse": results[0]["test/loss_mse"],
+        "test/adj_r2": results[0]["test/adj_r2"]
+    })
+elif TASK == "classification":
+    wandb_logger.log_metrics({
+        "test/accuracy": results[0]["test/accuracy"],
+    })
 
 print("Test results:", results)
 wandb_logger.experiment.finish()
