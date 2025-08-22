@@ -23,18 +23,18 @@ from main_code.FGR.load_FGR import get_fgr_module, fgroups_list, tokenizer
 
 SEED = 42
 NUM_FOLDS = 5
-BATCH_SIZE = 32
-NUM_EPOCHS = 15
+BATCH_SIZE = 128
+NUM_EPOCHS = 100
 LR = 1e-4
 DROPOUT = 0.2
 INPUT_SIZE = [256, 12798, 12798, 12798, 12798] # drug, expr, cnv, mut, meth
 USE_OMICS = [False, False, True, False]
 OUTPUT_SIZE = 1
-LAYERS_BEFORE_COMB = [256, 100] #as per deep aeg    
-LAYERS_AFTER_COMB = [300,1]     #as per deep aeg
+LAYERS_BEFORE_COMB = [1024,512, 256] #random 
+LAYERS_AFTER_COMB = [256,64,16]     #random
 COMB_TYPE = "concatenation" #or attention
 TASK = "regression" #or classification
-THRESHOLD = 0.0 #specify for classification task
+THRESHOLD = 0.0 #specify median for classification task
 
 if TASK == "regression":
     monitor_metric = "val/r2"
@@ -104,8 +104,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
     val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=60)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=1)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=1)
 
     # Initialize model 
     base_model = MultiViewNet(
@@ -115,7 +115,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
         input_size=INPUT_SIZE,
         output_size=OUTPUT_SIZE,
         dropout=DROPOUT,
-        activation="tanh",    #as per deepaeg for mutation
+        activation="relu",    
         comb=COMB_TYPE,
         fgr_encoder = encoder,
         task = TASK
@@ -148,20 +148,16 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     )
 
     # Early stopping callback
-    early_stop_callback = EarlyStopping(
-        monitor=monitor_metric,
-        patience=10,
-        mode="max",
-        verbose=True,
-    )
-
+    #early_stop_callback = EarlyStopping(monitor=monitor_metric,patience=10,mode="max",verbose=True,)
+    #not to be set for now
+    
     trainer = Trainer(
         max_epochs=NUM_EPOCHS,
         logger=wandb_logger,
         callbacks=[checkpoint_callback, early_stop_callback],
         accelerator="auto",
         devices=1,
-        precision = 16
+        precision = "16-mixed"
     )
 
     trainer.fit(model=lightning_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
@@ -173,16 +169,29 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
 print("\n--- Running final testing ---")
 
 
-test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
-test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=40)
+test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE,  task=TASK, ic50_threshold=THRESHOLD)
+test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=1)
 
 # Load best checkpoint
 best_checkpoint_path = checkpoint_callback.best_model_path
 print(f"Loading model from checkpoint: {best_checkpoint_path}")
 
-test_lightning_model = IC50LightningModel.load_from_checkpoint(best_checkpoint_path)
+test_model_base = MultiViewNet(
+    layers_before_comb=LAYERS_BEFORE_COMB,
+    layers_after_comb=LAYERS_AFTER_COMB,
+    use_omics=USE_OMICS,
+    input_size=INPUT_SIZE,
+    output_size=OUTPUT_SIZE,
+    dropout=DROPOUT,
+    activation="relu",
+    comb=COMB_TYPE,
+    fgr_encoder = encoder
+)
+
+test_lightning_model = IC50LightningModel.load_from_checkpoint(best_checkpoint_path, model=test_model_base)
 test_lightning_model.eval()
-test_trainer = Trainer(accelerator="gpu", devices=1, precision=16)
+
+test_trainer = Trainer(accelerator="gpu", devices=1,)#precision not required for testing
 
 with torch.no_grad():
     results = test_trainer.test(model=test_lightning_model, dataloaders=test_loader)
