@@ -1,10 +1,12 @@
 # Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 # .venv\Scripts\Activate.ps1
 
-import sys
+#source .venv/bin/activate
+#export PYTHONPATH="/home/workspace/da24c011/Thesis/main_code/FGR:$PYTHONPATH"
+
+print("Starting!")
 import os
-from pathlib import Path
-from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 import torch
 import pandas as pd
@@ -12,20 +14,24 @@ from torch.utils.data import DataLoader
 
 from lightning import Trainer, seed_everything
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
+#import wandb
 from lightning.pytorch.loggers import WandbLogger
+
 
 from main_code.network import MultiViewNet, IC50LightningModel
 from main_code.data_new import DrugOmicsIC50Dataset
 from main_code.FGR.load_FGR import get_fgr_module, fgroups_list, tokenizer
 
+torch.set_float32_matmul_precision("medium")
 
+print("Imported libraries!")
 # Configurations
 
 SEED = 42
 NUM_FOLDS = 5
-BATCH_SIZE = 128
-NUM_EPOCHS = 100
-LR = 1e-4
+BATCH_SIZE = 256
+NUM_EPOCHS = 10
+LR = 4e-4
 DROPOUT = 0.2
 INPUT_SIZE = [256, 12798, 12798, 12798, 12798] # drug, expr, cnv, mut, meth
 USE_OMICS = [False, False, True, False]
@@ -44,17 +50,22 @@ else:
     raise ValueError(f"Unknown TASK {TASK}")
 
 
-PROJECT_PATH = "/home/da24c011/miniconda3/project/"
+print("Global configs:",COMB_TYPE, TASK )
+
+PROJECT_PATH = "/home/workspace/da24c011"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
 FGR_CKPT_PATH = os.path.join(PROJECT_PATH, "checkpoints", "epoch_000_val_0.8505.ckpt")
 
 #FGR_CKPT_PATH = r"C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\checkpoints\epoch_000_val_0.8505.ckpt"
 PROJECT_NAME = f"mutation_{COMB_TYPE[:6]}_{TASK[:7]}" #omics_comb_task
+
 CHECKPOINT_DIR = f"checkpoints_cv/{PROJECT_NAME}" 
 RUN_NAME_BASE = "cv_fold" 
 
 #data 
 full_df = pd.read_csv((os.path.join(PROJECT_PATH, "data to be used", "fin_ic50_21-7.csv")))
+full_df["cancer type"] = full_df["TCGA cancer type"].fillna("Unknown")
+
 
 expression_df = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "expression_wo_cosmic.csv"))), index_col=0)
 mutation_df = pd.read_csv(((os.path.join(PROJECT_PATH, "raw data from colab", "mutation_wo_cosmic.csv"))), index_col=0)
@@ -86,12 +97,12 @@ print("encoder loaded!")
 
 seed_everything(SEED)
 train_val_df, test_df = train_test_split(
-    full_df, test_size=0.2, stratify=full_df["TCGA cancer type"], random_state=SEED, shuffle=True
+    full_df, test_size=0.2, stratify=full_df["cancer type"], random_state=SEED, shuffle=True
 )
 
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-y_strat = train_val_df["TCGA cancer type"]
+y_strat = train_val_df["cancer type"]
 
 # Training loop
 
@@ -104,8 +115,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
     val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=1)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=1)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
 
     # Initialize model 
     base_model = MultiViewNet(
@@ -126,7 +137,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     wandb_logger = WandbLogger(
         project=PROJECT_NAME,
         name=f"{RUN_NAME_BASE}_{fold + 1}",
-        log_model=True,
+        log_model='best',
     )
 
     wandb_logger.experiment.config.update({
@@ -154,8 +165,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     trainer = Trainer(
         max_epochs=NUM_EPOCHS,
         logger=wandb_logger,
-        callbacks=[checkpoint_callback, early_stop_callback],
-        accelerator="auto",
+        callbacks=[checkpoint_callback],
+        accelerator="gpu",
         devices=1,
         precision = "16-mixed"
     )
@@ -170,7 +181,7 @@ print("\n--- Running final testing ---")
 
 
 test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE,  task=TASK, ic50_threshold=THRESHOLD)
-test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=1)
+test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
 
 # Load best checkpoint
 best_checkpoint_path = checkpoint_callback.best_model_path
