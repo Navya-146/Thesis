@@ -1,10 +1,7 @@
 from typing import List
-
 import torch
 from torch import nn
-
 from main_code.FGR.load_FGR import get_fgr_model
-
 from typing import List
 from sklearn.metrics import r2_score
 import torch
@@ -15,12 +12,12 @@ from lightning import LightningModule
 
 class MultiViewNet(nn.Module):
     """
-    Multi-view neural network with:
+    Neural network with:
       - pre-concat MLP per modality (drug projected + omics branches)
-      - fusion (concat or attention)
+      - fusion (concatenation or attention)
       - post-concat MLP
     Behavior:
-      - drug branch is always created and used
+      - drug branch is always used
       - omics branches are created for each entry in input_size[1:]
       - use_omics masks which omics branches are active (True -> branch used)
       - input_size must have length == 1 + len(use_omics)
@@ -41,7 +38,7 @@ class MultiViewNet(nn.Module):
     ):
         super().__init__()
 
-        # basic validation
+        # validation
         if len(input_size) != 1 + len(use_omics):
             print(input_size, use_omics)
             raise ValueError(f"input_size must have length 1 + len(use_omics). Got {len(input_size)} vs {1 + len(use_omics)}")
@@ -87,7 +84,7 @@ class MultiViewNet(nn.Module):
             [ self._make_pre_concat_block(in_dim, layers_before_comb) for in_dim in omics_input_sizes ]
         )
 
-        # --- Fusion config ---
+        # config
         if comb == "attention":
             # one weight per active modality
             self.attn_weights = nn.Parameter(torch.randn(self.num_modalities))
@@ -160,38 +157,35 @@ class MultiViewNet(nn.Module):
         if len(omics_inputs) != len(self.omics_branches):
             raise RuntimeError("Unexpected number of omics inputs provided to forward()")
         
-        # --- pre-concat processing ---
+        # pre-concat processing
         views = []
-        # drug branch (always)
-        drug_proj = self.drug_branch(drug_features)
-        views.append(drug_proj)   # PROJECTED drug -> same dim as omics branch output
+        drug_proj = self.fgr_encoder(drug_input) 
+        drug_proj = drug_proj.squeeze(1)
+        views.append(drug_proj)
 
         # For each omics branch, only run it if use_omics[i] is True
         branch_idx = 0
         for i, (use_flag, branch) in enumerate(zip(self.use_omics, self.omics_branches)):
             if not use_flag:
-                # this modality is disabled in the model config; skip it
                 branch_idx += 1
                 continue
             omics_tensor = omics_inputs[i]
             if omics_tensor is None:
-                # dataset should provide these, but handle gracefully
                 raise ValueError(f"Omics modality at index {i} is enabled in the model (use_omics={self.use_omics}), but forward received None for it.")
             processed = branch(omics_tensor)
             views.append(processed)
             branch_idx += 1
 
-        # requirement: at least 1 omics branch present (plus drug)
         if len(views) <= 1:
             raise ValueError("Model requires at least one omics modality in addition to drug_latent (check use_omics).")
 
-        # --- fusion ---
+        # fusion
         if self.comb == "concatenation":
             fused = torch.cat(views, dim=1)
-        else:  # attention
+        else:  
             fused = self.attention_fuse(views)
 
-        # --- post-concat ---
+        # post-concat
         out = self.postconcat(fused)
         return out
 
@@ -262,3 +256,4 @@ class IC50LightningModel(LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)
+
