@@ -27,7 +27,7 @@ from main_code.FGR.src.data.components.utils import (
 from main_code.FGR.src.models.fgr_module import FGRPretrainLitModule
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # folder where this script lives
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
 
 #PROJECT_DIR = Path("C:\Users\pooja\OneDrive\Desktop\Documents\IITM\Thesis\Training data\final_ish\code\Rajeeva-IITM-yeast_growth_pred-3b6ddde\main_code\FGR").resolve()
 
@@ -50,7 +50,7 @@ def get_representation(
         mfg = np.stack([smiles2vector_mfg(x, tokenizer) for x in smiles])
         x = np.concatenate((f_g, mfg), axis=1)  # Concatenate both vectors
     else:
-        raise ValueError("Method not supported")  # Raise error if method not supported
+        raise ValueError("Method not supported")
     return x
 
 
