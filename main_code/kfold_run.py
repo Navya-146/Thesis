@@ -19,7 +19,7 @@ from lightning.pytorch.loggers import WandbLogger
 
 
 from main_code.network import MultiViewNet, IC50LightningModel
-from main_code.data_new import DrugOmicsIC50Dataset
+from main_code.data_new_2 import DrugOmicsIC50Dataset
 from main_code.FGR.load_FGR import get_fgr_module, fgroups_list, tokenizer
 
 torch.set_float32_matmul_precision("medium")
@@ -112,8 +112,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
     train_df = train_val_df.iloc[train_idx].reset_index(drop=True)
     val_df = train_val_df.iloc[val_idx].reset_index(drop=True)
 
-    train_dataset = DrugOmicsIC50Dataset(train_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
-    val_dataset = DrugOmicsIC50Dataset(val_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
+    train_dataset = DrugOmicsIC50Dataset(train_df, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
+    val_dataset = DrugOmicsIC50Dataset(val_df, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE, task=TASK, ic50_threshold=THRESHOLD)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
@@ -180,7 +180,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(train_val_df, y_strat)):
 print("\n--- Running final testing ---")
 
 
-test_dataset = DrugOmicsIC50Dataset(test_df, fgr_encoder, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE,  task=TASK, ic50_threshold=THRESHOLD)
+test_dataset = DrugOmicsIC50Dataset(test_df, omics_data, drug_dict, tokenizer, fgroups_list, INPUT_SIZE,  task=TASK, ic50_threshold=THRESHOLD)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
 
 # Load best checkpoint
